@@ -1,0 +1,1 @@
+go run sterben/main.go

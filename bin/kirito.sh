@@ -1,0 +1,1 @@
+go run kirito/main.go
