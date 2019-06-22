@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	fmt.Println("This is Sinon")
+
 	http.Handle("/", http.FileServer(http.Dir("./sinon/build")))
 
 	fmt.Println("Sinon is serving on port 3002...")

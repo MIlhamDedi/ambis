@@ -30,5 +30,5 @@ var (
 
 func init() {
 	// Log used configurations here
-	fmt.Printf("Running %s Environment...\n", EnvironmentMode)
+	fmt.Printf("Running in %s...\n", EnvironmentMode)
 }

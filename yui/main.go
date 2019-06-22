@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-
-	"ambis/lib/config"
 )
 
 type loginPageHandler struct{}
@@ -22,10 +20,9 @@ func (loginPageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fmt.Println("This is Yui")
-	rootPath := config.YuiRootPath
 
-	http.Handle(rootPath+"static/", http.StripPrefix(rootPath+"static/", http.FileServer(http.Dir("./yui/static"))))
-	http.Handle(rootPath, loginPageHandler{})
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./yui/static"))))
+	http.Handle("/login/", loginPageHandler{})
 
 	fmt.Println("Yui is serving on port 3000...")
 	log.Fatal(http.ListenAndServe(":3000", nil))
