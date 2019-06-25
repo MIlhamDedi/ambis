@@ -1,16 +1,22 @@
 package main
 
 import (
+	"ambis/lib/config"
 	"fmt"
 	"log"
 	"net/http"
 )
 
+const (
+	defaultPortAddr = 3001
+)
+
 func main() {
 	fmt.Println("This is Asuna")
+	portAddr := config.GetPortAddr(defaultPortAddr)
 
 	http.Handle("/", http.FileServer(http.Dir("./asuna/build")))
 
-	fmt.Println("Asuna is serving on port 3001...")
-	log.Fatal(http.ListenAndServe(":3001", nil))
+	fmt.Printf("Asuna is serving on %s...\n", portAddr)
+	log.Fatal(http.ListenAndServe(portAddr, nil))
 }
