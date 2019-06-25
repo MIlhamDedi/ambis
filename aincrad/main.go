@@ -6,14 +6,20 @@ import (
 	"net/http"
 
 	"ambis/aincrad/proxy"
+	"ambis/lib/config"
+)
+
+const (
+	defaultPortAddr = 5000
 )
 
 func main() {
 	fmt.Println("This is Aincrad")
+	portAddr := config.GetPortAddr(defaultPortAddr)
 
 	proxyHandler := proxy.NewHandler()
 	http.Handle("/", proxyHandler)
 
-	fmt.Println("Aincrad is serving on port 5000...")
-	log.Fatal(http.ListenAndServe(":5000", nil))
+	fmt.Printf("Aincrad is serving on %s...\n", portAddr)
+	log.Fatal(http.ListenAndServe(portAddr, nil))
 }
