@@ -12,6 +12,12 @@ var (
 	// Running Environment
 	EnvironmentMode = os.Getenv("ENV_MODE")
 
+	// Database Configuration
+	DBMode     = os.Getenv("DB_MODE")
+	DBName     = os.Getenv("DB_NAME")
+	DBUser     = os.Getenv("DB_USER")
+	DBPassword = os.Getenv("DB_PASSWORD")
+
 	// Internal Endpoint
 	AincradEndpoint    = os.Getenv("AINCRAD_ENDPOINT")
 	KiritoEndpoint     = os.Getenv("KIRITO_ENDPOINT")
@@ -29,6 +35,9 @@ var (
 	YuiRootPath        = os.Getenv("YUI_ROOT_PATH")
 	AsunaRootPath      = os.Getenv("ASUNA_ROOT_PATH")
 	SinonRootPath      = os.Getenv("SINON_ROOT_PATH")
+
+	// Secrets
+	SigningSecret = os.Getenv("SIGNING_SECRET")
 )
 
 // Configurations passed by flag arguments
