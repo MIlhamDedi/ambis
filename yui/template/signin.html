@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://code.getmdl.io/1.1.1/material.indigo-pink.min.css">
   <script defer src="https://code.getmdl.io/1.1.1/material.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <style>
     .remove-padding{
       padding:0px;
@@ -28,22 +29,41 @@
           <h2 class="mdl-card__title-text">Login</h2>
         </div>
         <div class="mdl-card__supporting-text">
-          <form action="#">
+          <form id="login-form" action="/login/" method="POST">
             <div class="mdl-textfield mdl-js-textfield">
-              <input class="mdl-textfield__input" type="text" id="email" />
-              <label class="mdl-textfield__label" for="email">Email</label>
+              <input class="mdl-textfield__input" type="text" id="username" />
+              <label class="mdl-textfield__label" for="username">Username</label>
             </div>
             <div class="mdl-textfield mdl-js-textfield">
-              <input class="mdl-textfield__input" type="password" id="userpass" />
+              <input class="mdl-textfield__input" type="password" id="password" />
               <label class="mdl-textfield__label" for="userpass">Password</label>
             </div>
           </form>
         </div>
         <div class="mdl-card__actions mdl-card--border">
-          <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Sign In </button>
+          <button type="submit" onclick="postForm()" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Sign In </button>
         </div>
       </div>
     </main>
   </div>
+
+  <script>
+    function postForm() {
+      var formData = {
+        username: $("#username")[0].value,
+        password: $("#password")[0].value,
+      }
+      console.log(formData);
+      
+      $.ajax({
+        type: "POST",
+        url: "/signin/",
+        data: JSON.stringify(formData),
+        success: function(){},
+        dataType: "json",
+        contentType : "application/json"
+      });
+    }
+  </script>
 </body>
 </html>
