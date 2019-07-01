@@ -3,8 +3,9 @@ package config
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Configurations passed by environment variable
@@ -54,9 +55,30 @@ func init() {
 	fmt.Printf("Running in %s...\n", EnvironmentMode)
 }
 
+// GetPortAddr returns custom port from flag -f if specified,
+// otherwise returns passed default port
 func GetPortAddr(defaultAddr int) string {
 	if *PortNumberPtr == 0 {
 		return fmt.Sprintf(":%d", defaultAddr)
 	}
 	return fmt.Sprintf(":%d", *PortNumberPtr)
+}
+
+// SetLogMode sets Logrus configuration with pre-configured setup
+func SetLogMode(envMode string) {
+	// Setting Formatter
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
+
+	// Setting Log Output
+	log.SetOutput(os.Stdout)
+
+	// Setting Log Level
+	switch envMode {
+	case "PRODUCTION":
+		log.SetLevel(log.WarnLevel)
+	default:
+		log.SetLevel(log.TraceLevel)
+	}
 }
