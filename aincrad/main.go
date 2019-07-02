@@ -9,13 +9,10 @@ import (
 	"ambis/lib/config"
 )
 
-const (
-	defaultPortAddr = 5000
-)
-
 func main() {
 	fmt.Println("This is Aincrad")
-	portAddr := config.GetPortAddr(defaultPortAddr)
+	appConfig := config.Get(config.AINCRAD)
+	portAddr := appConfig.PortAddr
 
 	proxyHandler := proxy.NewHandler()
 	http.Handle("/", proxyHandler)

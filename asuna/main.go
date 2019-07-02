@@ -7,13 +7,10 @@ import (
 	"net/http"
 )
 
-const (
-	defaultPortAddr = 3001
-)
-
 func main() {
 	fmt.Println("This is Asuna")
-	portAddr := config.GetPortAddr(defaultPortAddr)
+	appConfig := config.Get(config.ASUNA)
+	portAddr := appConfig.PortAddr
 
 	http.Handle("/", http.FileServer(http.Dir("./asuna/build")))
 
