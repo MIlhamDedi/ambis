@@ -12,17 +12,18 @@ import (
 type proxyHandler struct{}
 
 func (proxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	appConfig := config.Get(config.AINCRAD)
 	requestPaths := strings.Split(r.URL.Path, "/")
 	rootPath := requestPaths[1]
 
-	target := config.YuiEndpoint
+	target := appConfig.YuiEndpoint
 	trimPath := true
 
 	switch rootPath {
-	case config.SinonRootPath:
-		target = config.YuiEndpoint
-	case config.AsunaRootPath:
-		target = config.AsunaEndpoint
+	case appConfig.SinonRootPath:
+		target = appConfig.YuiEndpoint
+	case appConfig.AsunaRootPath:
+		target = appConfig.AsunaEndpoint
 	default: // Yui serves on '/'
 		trimPath = false
 	}
