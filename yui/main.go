@@ -7,37 +7,37 @@ import (
 	"ambis/yui/handler"
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-)
-
-const (
-	defaultPortAddr = 3000
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	fmt.Println("This is Yui")
-	portAddr := config.GetPortAddr(defaultPortAddr)
+	appConfig := config.Get(config.YUI)
+	s := NewServer(*appConfig)
+	log.Fatal(s.ListenAndServe())
+}
 
-	db, err := sql.Open(config.DBMode, fmt.Sprintf("%s:%s@/%s", config.DBUser, config.DBPassword, config.DBName))
+func NewServer(appConfig config.Config) *http.Server {
+	portAddr := appConfig.PortAddr
+	db, err := sql.Open(appConfig.DBMode, fmt.Sprintf("%s:%s@/%s", appConfig.DBUser, appConfig.DBPassword, appConfig.DBName))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	userRepo := account.UserRepoDB{DB: db}
 	userService := account.UserServiceImpl{UserRepo: &userRepo}
-
-	authService := auth.AuthServiceImpl{SigningSecret: config.SigningSecret}
-
-	signinHandler := handler.Signin{UserService: &userService, AuthService: &authService}
-	signupHandler := handler.Signup{UserService: &userService}
-
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./yui/static"))))
-	http.Handle("/signin/", http.StripPrefix("/signin/", signinHandler))
-	http.Handle("/signup/", http.StripPrefix("/signup/", signupHandler))
+	authService := auth.AuthServiceImpl{SigningSecret: appConfig.SigningSecret}
 
 	fmt.Printf("Yui is serving on %s...\n", portAddr)
-	log.Fatal(http.ListenAndServe(portAddr, nil))
+	return &http.Server{
+		Addr:           portAddr,
+		Handler:        handler.New(&authService, &userService),
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
 }
