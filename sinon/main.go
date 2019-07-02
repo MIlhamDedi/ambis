@@ -7,13 +7,10 @@ import (
 	"net/http"
 )
 
-const (
-	defaultPortAddr = 3002
-)
-
 func main() {
 	fmt.Println("This is Sinon")
-	portAddr := config.GetPortAddr(defaultPortAddr)
+	appConfig := config.Get(config.SINON)
+	portAddr := appConfig.PortAddr
 
 	http.Handle("/", http.FileServer(http.Dir("./sinon/build")))
 
