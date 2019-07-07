@@ -2,9 +2,17 @@ package constants
 
 import "errors"
 
-var (
-	ErrInternalError = errors.New("Internal Error")
+// Error messages
+const (
+	S_NO_ERROR       = "Success"
+	S_INTERNAL_ERROR = "Internal Error"
 
 	// Authentication
-	ErrExpiredToken = errors.New("Token Expired")
+	S_EXPIRED_TOKEN  = "Token Expired"
+	S_NO_MATCH_FOUND = "No Matching Credentials"
+)
+
+var (
+	ErrInternalError = errors.New(S_INTERNAL_ERROR)
+	ErrExpiredToken  = errors.New(S_EXPIRED_TOKEN)
 )
