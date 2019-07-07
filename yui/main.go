@@ -3,15 +3,15 @@ package main
 import (
 	"ambis/lib/auth"
 	"ambis/lib/config"
-	"ambis/yui/account"
 	"ambis/yui/handler"
-	"database/sql"
+	"ambis/yui/pb"
 	"fmt"
 	"net/http"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -23,19 +23,18 @@ func main() {
 
 func NewServer(appConfig config.Config) *http.Server {
 	portAddr := appConfig.PortAddr
-	db, err := sql.Open(appConfig.DBMode, fmt.Sprintf("%s:%s@/%s", appConfig.DBUser, appConfig.DBPassword, appConfig.DBName))
+	authService := auth.AuthServiceImpl{SigningSecret: appConfig.SigningSecret}
+	conn, err := grpc.Dial(appConfig.KiritoEndpoint, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
-	userRepo := account.UserRepoDB{DB: db}
-	userService := account.UserServiceImpl{UserRepo: &userRepo}
-	authService := auth.AuthServiceImpl{SigningSecret: appConfig.SigningSecret}
+	userServiceClient := pb.NewUserServiceClient(conn)
 
 	fmt.Printf("Yui is serving on %s...\n", portAddr)
 	return &http.Server{
 		Addr:           portAddr,
-		Handler:        handler.New(&authService, &userService),
+		Handler:        handler.New(userServiceClient, &authService),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,

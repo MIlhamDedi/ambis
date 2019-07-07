@@ -1,2 +1,25 @@
 syntax = "proto3";
 package pb;
+
+message Status {
+    bool Success = 1;
+    string Message = 2;
+}
+
+message User {
+    string Username = 1;
+    string FirstName = 2;
+    string LastName = 3;
+    string Email = 4;
+    string Password = 5;
+}
+
+message Response {
+    Status Status = 1;
+    User User = 2;
+}
+
+service UserService {
+    rpc Create(User) returns (Response);
+    rpc Verify(User) returns (Response); 
+}

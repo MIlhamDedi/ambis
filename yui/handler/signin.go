@@ -2,19 +2,22 @@ package handler
 
 import (
 	"ambis/lib/auth"
-	"ambis/yui/account"
+	"ambis/yui/pb"
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 /// Signin Handler
 // The Following Contains Signin Handler Implementation
 type Signin struct {
-	UserService account.UserService
-	AuthService auth.AuthService
+	UserServiceClient pb.UserServiceClient
+	AuthService       auth.AuthService
 }
 
 func (h Signin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +30,7 @@ func (h Signin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Signin) handleGet(w http.ResponseWriter, r *http.Request) error {
-	tmpl, err := template.ParseFiles("./yui/template/signin.html")
+	tmpl, err := template.ParseFiles("./yui/template/sso.html")
 	if err != nil {
 		fmt.Println("template not found")
 		return err
@@ -37,21 +40,27 @@ func (h Signin) handleGet(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h Signin) handlePost(w http.ResponseWriter, r *http.Request) error {
-	verifyUser := &account.VerifyUser{}
-	err := json.NewDecoder(r.Body).Decode(verifyUser)
+	user := &User{}
+	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return err
 	}
 
-	_, err = h.UserService.VerifyUser(verifyUser)
+	pbUser := pb.User{
+		Username: user.Username,
+		Password: user.Password,
+	}
+
+	_, err = h.UserServiceClient.Verify(context.Background(), &pbUser)
 	if err != nil {
+		log.Info(err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return err
 	}
 
 	expirationTime := time.Now().Add(5 * time.Minute)
-	authentication := auth.Authentication{ID: verifyUser.Username}
+	authentication := auth.Authentication{ID: user.Username}
 	createToken := auth.CreateToken{
 		Authentication: authentication,
 		ExpirationTime: expirationTime.Unix(),
@@ -65,6 +74,7 @@ func (h Signin) handlePost(w http.ResponseWriter, r *http.Request) error {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "ambis-session",
 		Value:   token,
+		Path:    "/",
 		Expires: expirationTime,
 	})
 
