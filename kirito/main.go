@@ -5,8 +5,8 @@ import (
 
 	"ambis/kirito/account"
 	"ambis/kirito/pb"
+	"ambis/lib/base"
 	"ambis/lib/config"
-	"ambis/lib/utils/db"
 	"net"
 
 	log "github.com/sirupsen/logrus"
@@ -17,9 +17,7 @@ import (
 func main() {
 	fmt.Println("This is Kirito")
 	appConfig := config.Get(config.KIRITO)
-	db := db.New(appConfig)
-
-	userService, err := account.NewUserService(db)
+	base, err := base.New(appConfig)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -29,13 +27,26 @@ func main() {
 		log.Panic(err)
 	}
 
+	srv, err := NewServer(base)
+	if err != nil {
+		base.Log.Panic(err)
+	}
+
+	if err = srv.Serve(listener); err != nil {
+		log.Panic(err)
+	}
+}
+
+func NewServer(b *base.Base) (*grpc.Server, error) {
+	userService, err := account.NewService(b)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	srv := grpc.NewServer()
 	pb.RegisterUserServiceServer(srv, userService)
 	reflection.Register(srv)
 
-	fmt.Printf("Kirito is serving on %s...\n", appConfig.PortAddr)
-	if err = srv.Serve(listener); err != nil {
-		log.Panic("heree")
-		log.Panic(err)
-	}
+	fmt.Printf("Kirito is serving on %s...\n", b.Config.PortAddr)
+	return srv, nil
 }

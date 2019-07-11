@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"ambis/lib/base"
 	"ambis/lib/constants"
 
 	"github.com/dgrijalva/jwt-go"
@@ -48,4 +49,10 @@ func (s *AuthServiceImpl) VerifyToken(cmd *VerifyToken) (Authentication, error) 
 
 	authentication = claims.Authentication
 	return authentication, nil
+}
+
+func NewService(base *base.Base) (*AuthServiceImpl, error) {
+	return &AuthServiceImpl{
+		SigningSecret: base.Config.SigningSecret,
+	}, nil
 }

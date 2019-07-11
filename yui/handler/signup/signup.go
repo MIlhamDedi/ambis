@@ -1,17 +1,30 @@
-package handler
+package signup
 
 import (
+	"ambis/lib/base"
 	"ambis/yui/pb"
 	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
+
+	"google.golang.org/grpc"
 )
+
+// User API specification (temp until grpc-web implementation)
+type User struct {
+	Username  string `json:"username"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
 
 // Signup Handler
 // The Following Contains SignUp Handler Implementation
 type Signup struct {
+	Base              *base.Base
 	UserServiceClient pb.UserServiceClient
 }
 
@@ -56,4 +69,16 @@ func (h Signup) handlePost(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	return nil
+}
+
+func New(b *base.Base) (*Signup, error) {
+	conn, err := grpc.Dial(b.Config.KiritoEndpoint, grpc.WithInsecure())
+	if err != nil {
+		b.Log.Panic(err)
+	}
+	userServiceClient := pb.NewUserServiceClient(conn)
+	return &Signup{
+		Base:              b,
+		UserServiceClient: userServiceClient,
+	}, nil
 }

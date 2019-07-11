@@ -1,7 +1,8 @@
-package handler
+package signin
 
 import (
 	"ambis/lib/auth"
+	"ambis/lib/base"
 	"ambis/yui/pb"
 	"context"
 	"encoding/json"
@@ -11,11 +12,22 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
+
+// User API specification (temp until grpc-web implementation)
+type User struct {
+	Username  string `json:"username"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
 
 /// Signin Handler
 // The Following Contains Signin Handler Implementation
 type Signin struct {
+	Base              *base.Base
 	UserServiceClient pb.UserServiceClient
 	AuthService       auth.AuthService
 }
@@ -79,4 +91,22 @@ func (h Signin) handlePost(w http.ResponseWriter, r *http.Request) error {
 	})
 
 	return nil
+}
+
+func New(b *base.Base) (*Signin, error) {
+	authService, err := auth.NewService(b)
+	if err != nil {
+		b.Log.Panic(err)
+	}
+
+	conn, err := grpc.Dial(b.Config.KiritoEndpoint, grpc.WithInsecure())
+	if err != nil {
+		b.Log.Panic(err)
+	}
+	userServiceClient := pb.NewUserServiceClient(conn)
+	return &Signin{
+		Base:              b,
+		UserServiceClient: userServiceClient,
+		AuthService:       authService,
+	}, nil
 }

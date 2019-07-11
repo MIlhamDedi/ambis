@@ -2,12 +2,12 @@ package account
 
 import (
 	"context"
-	"database/sql"
 
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"ambis/kirito/pb"
+	"ambis/lib/base"
 	"ambis/lib/constants"
 )
 
@@ -77,7 +77,7 @@ func (s *UserService) Verify(ctx context.Context, cmd *pb.User) (*pb.Response, e
 }
 
 // NewUserService instantitae UserService with passed DB as User repository
-func NewUserService(db *sql.DB) (*UserService, error) {
-	userRepo := UserRepoDB{DB: db}
+func NewService(b *base.Base) (*UserService, error) {
+	userRepo := UserRepoDB{DB: *b.DB}
 	return &UserService{UserRepo: &userRepo}, nil
 }
