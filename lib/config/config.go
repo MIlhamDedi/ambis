@@ -10,11 +10,14 @@ import (
 
 // Config serves standard App Configuration
 type Config struct {
+	// Runnning Application
+	AppName AppIdentifier
+
 	// Server Port Address
 	PortAddr string
 
 	// Running Environment
-	EnvironmentMode string
+	EnvironmentMode EnvIdentifier
 
 	// Database Configuration
 	DBMode     string
@@ -42,20 +45,35 @@ type Config struct {
 	SigningSecret string
 }
 
-// App Enums
+// Indentifiers
+type (
+	// Application
+	AppIdentifier string
+
+	// Environment
+	EnvIdentifier string
+)
+
+// Enums
 const (
-	AINCRAD    = 0
-	ALFHEIM    = 1
-	KIRITO     = 2
-	HEATHCLIFF = 3
-	STERBEN    = 4
-	YUI        = 5
-	ASUNA      = 6
-	SINON      = 7
+	// Applications
+	AINCRAD    AppIdentifier = "aincrad"
+	ALFHEIM    AppIdentifier = "alfheim"
+	KIRITO     AppIdentifier = "kirito"
+	HEATHCLIFF AppIdentifier = "heathcliff"
+	STERBEN    AppIdentifier = "sterben"
+	YUI        AppIdentifier = "yui"
+	ASUNA      AppIdentifier = "asuna"
+	SINON      AppIdentifier = "sinon"
+
+	// Environments
+	DEVELOPMENT EnvIdentifier = "development"
+	STAGING     EnvIdentifier = "staging"
+	PRODUCTION  EnvIdentifier = "production"
 )
 
 // Default Apps PortAddr
-var defaultPortAddr = map[int]int{
+var defaultPortAddr = map[AppIdentifier]int{
 	AINCRAD:    5000,
 	ALFHEIM:    5001,
 	KIRITO:     4000,
@@ -82,10 +100,11 @@ func init() {
 }
 
 // Configurations passed by environment variable
-func Get(appEnum int) *Config {
+func Get(appEnum AppIdentifier) *Config {
 	return &Config{
+		AppName:            appEnum,
 		PortAddr:           GetPortAddr(appEnum),
-		EnvironmentMode:    os.Getenv("ENV_MODE"),
+		EnvironmentMode:    EnvIdentifier(os.Getenv("ENV_MODE")),
 		DBMode:             os.Getenv("DB_MODE"),
 		DBName:             os.Getenv("DB_NAME"),
 		DBUser:             os.Getenv("DB_USER"),
@@ -107,28 +126,9 @@ func Get(appEnum int) *Config {
 
 // GetPortAddr returns custom port from flag -f if specified,
 // otherwise returns passed default port
-func GetPortAddr(appEnum int) string {
+func GetPortAddr(appEnum AppIdentifier) string {
 	if *PortNumberPtr == 0 {
 		return fmt.Sprintf(":%d", defaultPortAddr[appEnum])
 	}
 	return fmt.Sprintf(":%d", *PortNumberPtr)
-}
-
-// SetLogMode sets Logrus configuration with pre-configured setup
-func SetLogMode(envMode string) {
-	// Setting Formatter
-	log.SetFormatter(&log.TextFormatter{
-		FullTimestamp: true,
-	})
-
-	// Setting Log Output
-	log.SetOutput(os.Stdout)
-
-	// Setting Log Level
-	switch envMode {
-	case "PRODUCTION":
-		log.SetLevel(log.WarnLevel)
-	default:
-		log.SetLevel(log.TraceLevel)
-	}
 }

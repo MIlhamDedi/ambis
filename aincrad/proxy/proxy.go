@@ -6,13 +6,15 @@ import (
 	"net/url"
 	"strings"
 
-	"ambis/lib/config"
+	"ambis/lib/base"
 )
 
-type proxyHandler struct{}
+type proxyHandler struct {
+	Base *base.Base
+}
 
-func (proxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	appConfig := config.Get(config.AINCRAD)
+func (h proxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	appConfig := h.Base.Config
 	requestPaths := strings.Split(r.URL.Path, "/")
 	rootPath := requestPaths[1]
 
@@ -42,6 +44,6 @@ func (proxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 
-func NewHandler() *proxyHandler {
-	return &proxyHandler{}
+func New(b *base.Base) *proxyHandler {
+	return &proxyHandler{Base: b}
 }
